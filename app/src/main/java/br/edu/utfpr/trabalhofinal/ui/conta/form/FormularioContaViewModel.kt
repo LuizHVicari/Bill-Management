@@ -41,7 +41,7 @@ class FormularioContaViewModel(
                 descricao = state.descricao.copy(valor = conta.descricao),
                 data = state.data.copy(valor = conta.data.toString()),
                 valor = state.valor.copy(valor = conta.valor.toString()),
-                paga = state.paga.copy(valor = conta.paga.toString()),
+                paga = conta.paga,
                 tipo = state.tipo.copy(valor = conta.tipo.name)
             )
         }
@@ -81,16 +81,19 @@ class FormularioContaViewModel(
             )
         }
     }
-    fun onStatusPagamentoAlterado(novoStatusPagamento: String) {
-        println(novoStatusPagamento)
-        if (state.paga.valor != novoStatusPagamento) {
-            state = state.copy(
-                paga = state.paga.copy(
-                    valor = novoStatusPagamento
-                )
-            )
-        }
+    fun onStatusPagamentoAlterado(novoPaga: Boolean) {
+//        println(novoStatusPagamento)
+//        if (state.paga.valor != novoStatusPagamento) {
+//            state = state.copy(
+//                paga = state.paga.copy(
+//                    valor = novoStatusPagamento
+//                )
+//            )
+//        }
+        state = state.copy(paga = novoPaga)
+        println(state.paga)
     }
+
     fun onTipoAlterado(novoTipo: String) {
         if (state.tipo.valor != novoTipo) {
             state = state.copy(
@@ -108,13 +111,13 @@ class FormularioContaViewModel(
             println(state.descricao.valor)
             println(state.data.valor)
             println(state.valor.valor)
-            println(state.paga.valor)
+            println(state.paga)
             println(state.tipo.valor)
             val conta = state.conta.copy(
                 descricao = state.descricao.valor,
                 data = LocalDate.parse(state.data.valor),
                 valor = BigDecimal(state.valor.valor),
-                paga = state.paga.valor == "true",
+                paga = state.paga,
                 tipo = TipoContaEnum.valueOf(state.tipo.valor)
             )
             println("passou")

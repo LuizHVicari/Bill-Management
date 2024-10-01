@@ -138,7 +138,6 @@ fun FormularioContaScreen(
                 descricao = viewModel.state.descricao,
                 data = viewModel.state.data,
                 valor = viewModel.state.valor,
-                paga = viewModel.state.paga,
                 tipo = viewModel.state.tipo,
                 onDescricaoAlterada = viewModel::onDescricaoAlterada,
                 onDataAlterada = viewModel::onDataAlterada,
@@ -265,35 +264,20 @@ private fun FormContent(
     descricao: CampoFormulario,
     data: CampoFormulario,
     valor: CampoFormulario,
-    paga: CampoFormulario,
     tipo: CampoFormulario,
     onDescricaoAlterada: (String) -> Unit,
     onDataAlterada: (String) -> Unit,
     onValorAlterado: (String) -> Unit,
-    onStatusPagamentoAlterado: (String) -> Unit,
+    onStatusPagamentoAlterado: (Boolean) -> Unit,
     onTipoAlterado: (String) -> Unit
 ) {
     var showDatePicker by remember { mutableStateOf(false)}
     val datePickerState = rememberDatePickerState()
 
     var dateFieldText by remember { mutableStateOf("Informe a data atual") }
+    var paga by remember { mutableStateOf(false)}
 
     if (showDatePicker) {
-//        Popup (
-//            onDismissRequest = { showDatePicker = false },
-//            alignment = Alignment.Center
-//        ) {
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(Sizes.SCREEN_DISTANCE_PADDING)
-//            ) {
-//                DatePicker(
-//                    state = datePickerState,
-//                    showModeToggle = false
-//                    )
-//            }
-//        }
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
@@ -372,12 +356,6 @@ private fun FormContent(
             )
             Box{
                 OutlinedTextField(
-//                    modifier = formTextFieldModifier,
-//                    titulo = stringResource(R.string.data),
-//                    campoFormulario = data.valor,
-//                    onValorAlterado = { onDataAlterada },
-//                    keyboardType = KeyboardType.Number,
-//                    keyboardCapitalization = KeyboardCapitalization.Words,
                     value = dateFieldText,
                     onValueChange = {},
                     modifier = formTextFieldModifier
@@ -407,34 +385,40 @@ private fun FormContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            Checkbox(checked = false, onCheckedChange = {
+            Checkbox(checked = paga, onCheckedChange = {
+                paga = !paga
+                onStatusPagamentoAlterado(paga)
             })
-            Text("Paga")
+            Text(stringResource(id = R.string.paga))
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.AccountBalance,
-                contentDescription = stringResource(R.string.tipo),
-                tint = MaterialTheme.colorScheme.outline
-            )
-            FormTextField(
-                modifier = formTextFieldModifier,
-                titulo = stringResource(R.string.tipo),
-                campoFormulario = tipo,
-                onValorAlterado = onTipoAlterado,
-                enabled = !processando
-            )
-        }
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.Start
-//        ) {
-//            RadioButton(selected = true, onClick = { /*TODO*/ })
-//            Text("Despesa")
-//            RadioButton(selected = false, onClick = { /*TODO*/ })
-//            Text("Receita")
+//        Row(verticalAlignment = Alignment.CenterVertically) {
+//            Icon(
+//                imageVector = Icons.Filled.AccountBalance,
+//                contentDescription = stringResource(R.string.tipo),
+//                tint = MaterialTheme.colorScheme.outline
+//            )
+//            FormTextField(
+//                modifier = formTextFieldModifier,
+//                titulo = stringResource(R.string.tipo),
+//                campoFormulario = tipo,
+//                onValorAlterado = onTipoAlterado,
+//                enabled = !processando
+//            )
 //        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            RadioButton(
+                selected = tipo.valor == "DESPESA",
+                onClick = { onTipoAlterado("DESPESA") })
+            Text("Despesa")
+            RadioButton(
+                selected = tipo.valor == "RECEITA",
+                onClick = { onTipoAlterado("RECEITA") })
+            Text("Receita")
+        }
     }
 }
 @Composable
@@ -489,7 +473,6 @@ private fun FormContentPreview() {
             descricao = CampoFormulario(),
             data = CampoFormulario(),
             valor = CampoFormulario(),
-            paga = CampoFormulario(),
             tipo = CampoFormulario(),
             onDescricaoAlterada = {},
             onDataAlterada = {},
