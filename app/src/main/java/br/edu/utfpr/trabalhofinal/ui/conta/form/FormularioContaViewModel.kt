@@ -69,6 +69,7 @@ class FormularioContaViewModel(
                 )
             )
         }
+        println(state.data)
     }
     fun onValorAlterado(novoValor: String) {
         if (state.valor.valor != novoValor) {
@@ -80,6 +81,7 @@ class FormularioContaViewModel(
         }
     }
     fun onStatusPagamentoAlterado(novoStatusPagamento: String) {
+        println(novoStatusPagamento)
         if (state.paga.valor != novoStatusPagamento) {
             state = state.copy(
                 paga = state.paga.copy(
@@ -102,13 +104,19 @@ class FormularioContaViewModel(
             state = state.copy(
                 salvando = true
             )
+            println(state.descricao.valor)
+            println(state.data.valor)
+            println(state.valor.valor)
+            println(state.paga.valor)
+            println(state.tipo.valor)
             val conta = state.conta.copy(
                 descricao = state.descricao.valor,
-                data = LocalDate.parse(state.data.valor),
+//                data = LocalDate.parse(state.data.valor),
                 valor = BigDecimal(state.valor.valor),
                 paga = state.paga.valor == "true",
                 tipo = TipoContaEnum.valueOf(state.tipo.valor)
             )
+            println("passou")
             ContaDatasource.instance.salvar(conta)
             state = state.copy(
                 salvando = false,

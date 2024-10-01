@@ -1,8 +1,11 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
 package br.edu.utfpr.trabalhofinal.ui.conta.form
+import android.annotation.SuppressLint
+import android.provider.CalendarContract.Colors
 import android.widget.RadioGroup
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,14 +34,18 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
@@ -50,6 +57,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -66,6 +74,8 @@ import br.edu.utfpr.trabalhofinal.ui.theme.TrabalhoFinalTheme
 import br.edu.utfpr.trabalhofinal.ui.utils.composables.Carregando
 import br.edu.utfpr.trabalhofinal.ui.utils.composables.ErroAoCarregar
 import br.edu.utfpr.trabalhofinal.ui.utils.constants.Sizes
+import br.edu.utfpr.trabalhofinal.utils.formatar
+import java.time.LocalDate
 import java.util.Date
 
 @Composable
@@ -265,6 +275,8 @@ private fun FormContent(
     var showDatePicker by remember { mutableStateOf(false)}
     val datePickerState = rememberDatePickerState()
 
+    var dateFieldText = "Informe a data atual"
+
     if (showDatePicker) {
 //        Popup (
 //            onDismissRequest = { showDatePicker = false },
@@ -286,7 +298,13 @@ private fun FormContent(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        println(" Data ${ Date(datePickerState.selectedDateMillis!!) }")
+                        val dateMillis = datePickerState.selectedDateMillis
+                        if (dateMillis != null) {
+                            val date = Date(datePickerState.selectedDateMillis!!)
+                            data.valor = LocalDate.of(date.year, date.month, date.day).toString()
+                            onDataAlterada(data.valor)
+                            dateFieldText = LocalDate.of(date.year, date.month, date.day).formatar()
+                        }
                         showDatePicker = false
                     }) {
                     Text("OK")
@@ -341,71 +359,77 @@ private fun FormContent(
                 enabled = !processando
             )
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable { showDatePicker = true }
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = Icons.Filled.CalendarMonth,
                 contentDescription = stringResource(R.string.data),
                 tint = MaterialTheme.colorScheme.outline
             )
+            Box{
+                OutlinedTextField(
+//                    modifier = formTextFieldModifier,
+//                    titulo = stringResource(R.string.data),
+//                    campoFormulario = data.valor,
+//                    onValorAlterado = { onDataAlterada },
+//                    keyboardType = KeyboardType.Number,
+//                    keyboardCapitalization = KeyboardCapitalization.Words,
+                    value = dateFieldText,
+                    onValueChange = {},
+                    modifier = formTextFieldModifier
+                )
+                Box(modifier = Modifier
+                    .matchParentSize()
+                    .clickable { showDatePicker = true })
+            }
+
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = stringResource(R.string.paga),
+                tint = MaterialTheme.colorScheme.outline
+            )
             FormTextField(
                 modifier = formTextFieldModifier,
-                titulo = stringResource(R.string.data),
-                campoFormulario = data,
-                onValorAlterado = onDataAlterada,
-                keyboardType = KeyboardType.Number,
-                keyboardCapitalization = KeyboardCapitalization.Words,
-                enabled = false
+                titulo = stringResource(R.string.paga),
+                campoFormulario = paga,
+                onValorAlterado = onStatusPagamentoAlterado,
+                enabled = !processando
             )
         }
-//        Row(verticalAlignment = Alignment.CenterVertically) {
-//            Icon(
-//                imageVector = Icons.Filled.Check,
-//                contentDescription = stringResource(R.string.paga),
-//                tint = MaterialTheme.colorScheme.outline
-//            )
-//            FormTextField(
-//                modifier = formTextFieldModifier,
-//                titulo = stringResource(R.string.paga),
-//                campoFormulario = paga,
-//                onValorAlterado = onStatusPagamentoAlterado,
-//                enabled = !processando
-//            )
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.Start
+//        ) {
+//            Checkbox(checked = false, onCheckedChange = {
+//            })
+//            Text("Paga")
 //        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Checkbox(checked = false, onCheckedChange = {})
-            Text("Paga")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Filled.AccountBalance,
+                contentDescription = stringResource(R.string.tipo),
+                tint = MaterialTheme.colorScheme.outline
+            )
+            FormTextField(
+                modifier = formTextFieldModifier,
+                titulo = stringResource(R.string.tipo),
+                campoFormulario = tipo,
+                onValorAlterado = onTipoAlterado,
+                enabled = !processando
+            )
         }
-//        Row(verticalAlignment = Alignment.CenterVertically) {
-//            Icon(
-//                imageVector = Icons.Filled.AccountBalance,
-//                contentDescription = stringResource(R.string.tipo),
-//                tint = MaterialTheme.colorScheme.outline
-//            )
-//            FormTextField(
-//                modifier = formTextFieldModifier,
-//                titulo = stringResource(R.string.tipo),
-//                campoFormulario = tipo,
-//                onValorAlterado = onTipoAlterado,
-//                enabled = !processando
-//            )
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.Start
+//        ) {
+//            RadioButton(selected = true, onClick = { /*TODO*/ })
+//            Text("Despesa")
+//            RadioButton(selected = false, onClick = { /*TODO*/ })
+//            Text("Receita")
 //        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            RadioButton(selected = true, onClick = { /*TODO*/ })
-            Text("Despesa")
-            RadioButton(selected = false, onClick = { /*TODO*/ })
-            Text("Receita")
-        }
     }
 }
 @Composable
@@ -418,10 +442,11 @@ fun FormTextField(
     keyboardCapitalization: KeyboardCapitalization = KeyboardCapitalization.Sentences,
     keyboardImeAction: ImeAction = ImeAction.Next,
     keyboardType: KeyboardType = KeyboardType.Text,
-    visualTransformation: VisualTransformation = VisualTransformation.None
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    readOnly: Boolean = false
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -436,7 +461,8 @@ fun FormTextField(
                 imeAction = keyboardImeAction,
                 keyboardType = keyboardType
             ),
-            visualTransformation = visualTransformation
+            visualTransformation = visualTransformation,
+            readOnly = readOnly,
         )
         if (campoFormulario.contemErro) {
             Text(
@@ -448,6 +474,7 @@ fun FormTextField(
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 private fun FormContentPreview() {
