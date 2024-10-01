@@ -1,0 +1,42 @@
+package br.edu.utfpr.trabalhofinal.ui.theme
+
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.ui.graphics.Color
+
+val  DarkColors = darkColorScheme(
+     primary = Color(0xFFAAC7FF),
+     onPrimary = Color(0xFF0B305F),
+     primaryContainer = Color(0xFF284777),
+     onPrimaryContainer = Color(0xFFD7E3FF),
+     secondary = Color(0xFFBEC6DC),
+     onSecondary = Color(0xFF283141),
+     secondaryContainer = Color(0xFF3E4759),
+     onSecondaryContainer = Color(0xFFDAE2F9),
+     tertiary = Color(0xFFE8B5EF),
+     onTertiary = Color(0xFF472150),
+     tertiaryContainer = Color(0xFF603768),
+     onTertiaryContainer = Color(0xFFFCD6FF),
+     error = Color(0xFFFFB4AB),
+     onError = Color(0xFF690005),
+     errorContainer = Color(0xFF93000A),
+     onErrorContainer = Color(0xFFFFDAD6),
+     background = Color(0xFF111318),
+     onBackground = Color(0xFFE2E2E9),
+     surface = Color(0xFF111318),
+     onSurface = Color(0xFFE2E2E9),
+     surfaceVariant = Color(0xFF44474E),
+     onSurfaceVariant = Color(0xFFC4C6D0),
+     outline = Color(0xFF8E9099),
+     outlineVariant = Color(0xFF44474E),
+     scrim = Color(0xFF000000),
+     inverseSurface = Color(0xFFE2E2E9),
+     inverseOnSurface = Color(0xFF2E3036),
+     inversePrimary = Color(0xFF415F91),
+     surfaceDim = Color(0xFF111318),
+     surfaceBright = Color(0xFF37393E),
+     surfaceContainerLowest = Color(0xFF0C0E13),
+     surfaceContainerLow = Color(0xFF191C20),
+     surfaceContainer = Color(0xFF1E2025),
+     surfaceContainerHigh = Color(0xFF282A2F),
+     surfaceContainerHighest = Color(0xFF33353A),
+)

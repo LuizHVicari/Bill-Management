@@ -19,8 +19,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -51,6 +53,7 @@ import br.edu.utfpr.trabalhofinal.utils.calcularSaldo
 import br.edu.utfpr.trabalhofinal.utils.formatar
 import java.math.BigDecimal
 import java.time.LocalDate
+
 
 @Composable
 fun ListaContasScreen(
@@ -169,51 +172,68 @@ private fun List(
 ) {
     LazyColumn(modifier = modifier.padding(horizontal = Sizes.SCREEN_DISTANCE_PADDING)) {
         items(contas) { conta ->
-            Row (
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier
-                    .clickable { onContaPressed(conta) }
-                    .fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = if (conta.paga) {
-                        Icons.Filled.ThumbUp
-                    } else {
-                        Icons.Filled.ThumbDown
-                    },
-                    tint = if (conta.tipo == TipoContaEnum.DESPESA) {
-                        CustomColors.OUTCOME_RED
-                    } else {
-                        CustomColors.INCOME_GREEN
-                    },
-                    contentDescription = stringResource(id = R.string.bill_type)
-                )
-                Column (
-                    modifier = Modifier.padding(start=Sizes.LIST_ITEM_SEPARATION)
-                ) {
-                    Text(text = conta.descricao)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = conta.data.formatar())
-                        if (conta.tipo == TipoContaEnum.RECEITA) {
-                            Text(
-                                text = "R$${conta.valor}",
-                                color = CustomColors.INCOME_GREEN
-                                )
-                        } else {
-                            Text(
-                                text = "-R$${conta.valor}",
-                                color = CustomColors.OUTCOME_RED
-                            )
-                        }
+            BillItem(onContaPressed, conta)
+        }
+    }
+}
 
+@Composable
+private fun BillItem(
+    onContaPressed: (Conta) -> Unit,
+    conta: Conta
+) {
+
+
+    Column (
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = Sizes.LIST_ITEM_SEPARATION)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround,
+            modifier = Modifier
+                .clickable { onContaPressed(conta) }
+                .fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = if (conta.paga) {
+                    Icons.Filled.ThumbUp
+                } else {
+                    Icons.Outlined.ThumbDown
+                },
+                tint = if (conta.tipo == TipoContaEnum.DESPESA) {
+                    CustomColors.OUTCOME_RED
+                } else {
+                    CustomColors.INCOME_GREEN
+                },
+                contentDescription = stringResource(id = R.string.bill_type)
+            )
+            Column(
+                modifier = Modifier.padding(start = Sizes.ICON_CONTENT_LIST_ITEM_SEPARATION)
+            ) {
+                Text(text = conta.descricao)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = conta.data.formatar())
+                    if (conta.tipo == TipoContaEnum.RECEITA) {
+                        Text(
+                            text = "R$${conta.valor}",
+                            color = CustomColors.INCOME_GREEN
+                        )
+                    } else {
+                        Text(
+                            text = "-R$${conta.valor}",
+                            color = CustomColors.OUTCOME_RED
+                        )
                     }
+
                 }
             }
         }
+        HorizontalDivider(modifier = Modifier.padding(top=Sizes.DIVIDER_TOP_PADDING))
     }
 }
 
@@ -253,7 +273,7 @@ private fun BottomBar(
             modifier = Modifier.padding(bottom = 20.dp),
             titulo = stringResource(R.string.previsao),
             valor = contas.calcularProjecao(),
-            textColor = if (balance >= BigDecimal(0)) {
+            textColor = if (projection >= BigDecimal(0)) {
                 CustomColors.INCOME_GREEN
             } else {
                 CustomColors.OUTCOME_RED

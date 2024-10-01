@@ -50,8 +50,14 @@ fun TrabalhoFinalTheme(
         else -> LightColorScheme
     }
 
+    val colors = if (!darkTheme) {
+        LightColors
+    } else {
+        DarkColors
+    }
+
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = colors,
         typography = Typography,
         content = content
     )

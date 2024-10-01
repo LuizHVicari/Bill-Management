@@ -1,4 +1,10 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package br.edu.utfpr.trabalhofinal.ui.conta.form
+import android.widget.RadioGroup
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,12 +24,16 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -31,9 +41,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -44,11 +58,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.edu.utfpr.trabalhofinal.R
+import br.edu.utfpr.trabalhofinal.data.TipoContaEnum
 import br.edu.utfpr.trabalhofinal.ui.theme.TrabalhoFinalTheme
 import br.edu.utfpr.trabalhofinal.ui.utils.composables.Carregando
 import br.edu.utfpr.trabalhofinal.ui.utils.composables.ErroAoCarregar
+import br.edu.utfpr.trabalhofinal.ui.utils.constants.Sizes
+import java.util.Date
+
 @Composable
 fun FormularioContaScreen(
     modifier: Modifier = Modifier,
@@ -227,6 +246,7 @@ private fun AppBarPreview() {
         )
     }
 }
+
 @Composable
 private fun FormContent(
     modifier: Modifier = Modifier,
@@ -242,6 +262,46 @@ private fun FormContent(
     onStatusPagamentoAlterado: (String) -> Unit,
     onTipoAlterado: (String) -> Unit
 ) {
+    var showDatePicker by remember { mutableStateOf(false)}
+    val datePickerState = rememberDatePickerState()
+
+    if (showDatePicker) {
+//        Popup (
+//            onDismissRequest = { showDatePicker = false },
+//            alignment = Alignment.Center
+//        ) {
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(Sizes.SCREEN_DISTANCE_PADDING)
+//            ) {
+//                DatePicker(
+//                    state = datePickerState,
+//                    showModeToggle = false
+//                    )
+//            }
+//        }
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        println(" Data ${ Date(datePickerState.selectedDateMillis!!) }")
+                        showDatePicker = false
+                    }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
     Column(
         modifier = modifier
             .padding(all = 16.dp)
@@ -269,22 +329,6 @@ private fun FormContent(
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = Icons.Filled.CalendarMonth,
-                contentDescription = stringResource(R.string.data),
-                tint = MaterialTheme.colorScheme.outline
-            )
-            FormTextField(
-                modifier = formTextFieldModifier,
-                titulo = stringResource(R.string.data),
-                campoFormulario = data,
-                onValorAlterado = onDataAlterada,
-                keyboardType = KeyboardType.Number,
-                keyboardCapitalization = KeyboardCapitalization.Words,
-                enabled = !processando
-            )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
                 imageVector = Icons.Filled.AttachMoney,
                 contentDescription = stringResource(R.string.valor),
                 tint = MaterialTheme.colorScheme.outline
@@ -297,33 +341,70 @@ private fun FormContent(
                 enabled = !processando
             )
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clickable { showDatePicker = true }
+        ) {
             Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = stringResource(R.string.paga),
+                imageVector = Icons.Filled.CalendarMonth,
+                contentDescription = stringResource(R.string.data),
                 tint = MaterialTheme.colorScheme.outline
             )
             FormTextField(
                 modifier = formTextFieldModifier,
-                titulo = stringResource(R.string.paga),
-                campoFormulario = paga,
-                onValorAlterado = onStatusPagamentoAlterado,
-                enabled = !processando
+                titulo = stringResource(R.string.data),
+                campoFormulario = data,
+                onValorAlterado = onDataAlterada,
+                keyboardType = KeyboardType.Number,
+                keyboardCapitalization = KeyboardCapitalization.Words,
+                enabled = false
             )
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.AccountBalance,
-                contentDescription = stringResource(R.string.tipo),
-                tint = MaterialTheme.colorScheme.outline
-            )
-            FormTextField(
-                modifier = formTextFieldModifier,
-                titulo = stringResource(R.string.tipo),
-                campoFormulario = tipo,
-                onValorAlterado = onTipoAlterado,
-                enabled = !processando
-            )
+//        Row(verticalAlignment = Alignment.CenterVertically) {
+//            Icon(
+//                imageVector = Icons.Filled.Check,
+//                contentDescription = stringResource(R.string.paga),
+//                tint = MaterialTheme.colorScheme.outline
+//            )
+//            FormTextField(
+//                modifier = formTextFieldModifier,
+//                titulo = stringResource(R.string.paga),
+//                campoFormulario = paga,
+//                onValorAlterado = onStatusPagamentoAlterado,
+//                enabled = !processando
+//            )
+//        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Checkbox(checked = false, onCheckedChange = {})
+            Text("Paga")
+        }
+//        Row(verticalAlignment = Alignment.CenterVertically) {
+//            Icon(
+//                imageVector = Icons.Filled.AccountBalance,
+//                contentDescription = stringResource(R.string.tipo),
+//                tint = MaterialTheme.colorScheme.outline
+//            )
+//            FormTextField(
+//                modifier = formTextFieldModifier,
+//                titulo = stringResource(R.string.tipo),
+//                campoFormulario = tipo,
+//                onValorAlterado = onTipoAlterado,
+//                enabled = !processando
+//            )
+//        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            RadioButton(selected = true, onClick = { /*TODO*/ })
+            Text("Despesa")
+            RadioButton(selected = false, onClick = { /*TODO*/ })
+            Text("Receita")
         }
     }
 }
