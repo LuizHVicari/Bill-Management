@@ -189,6 +189,7 @@ private fun BillItem(
             .fillMaxWidth()
             .padding(top = Sizes.LIST_ITEM_SEPARATION)
     ) {
+        println(conta.data)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceAround,

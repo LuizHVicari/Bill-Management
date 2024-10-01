@@ -62,6 +62,7 @@ class FormularioContaViewModel(
         0
     }
     fun onDataAlterada(novaData: String) {
+        println(novaData)
         if (state.data.valor != novaData) {
             state = state.copy(
                 data = state.data.copy(
@@ -111,7 +112,7 @@ class FormularioContaViewModel(
             println(state.tipo.valor)
             val conta = state.conta.copy(
                 descricao = state.descricao.valor,
-//                data = LocalDate.parse(state.data.valor),
+                data = LocalDate.parse(state.data.valor),
                 valor = BigDecimal(state.valor.valor),
                 paga = state.paga.valor == "true",
                 tipo = TipoContaEnum.valueOf(state.tipo.valor)

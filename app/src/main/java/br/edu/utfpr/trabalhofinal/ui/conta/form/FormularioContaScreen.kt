@@ -75,6 +75,7 @@ import br.edu.utfpr.trabalhofinal.ui.utils.composables.Carregando
 import br.edu.utfpr.trabalhofinal.ui.utils.composables.ErroAoCarregar
 import br.edu.utfpr.trabalhofinal.ui.utils.constants.Sizes
 import br.edu.utfpr.trabalhofinal.utils.formatar
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.Date
 
@@ -275,7 +276,7 @@ private fun FormContent(
     var showDatePicker by remember { mutableStateOf(false)}
     val datePickerState = rememberDatePickerState()
 
-    var dateFieldText = "Informe a data atual"
+    var dateFieldText by remember { mutableStateOf("Informe a data atual") }
 
     if (showDatePicker) {
 //        Popup (
@@ -300,10 +301,14 @@ private fun FormContent(
                     onClick = {
                         val dateMillis = datePickerState.selectedDateMillis
                         if (dateMillis != null) {
-                            val date = Date(datePickerState.selectedDateMillis!!)
-                            data.valor = LocalDate.of(date.year, date.month, date.day).toString()
+                            val date = Date(dateMillis)
+                            val year = date.year + 1900
+                            val month = date.month + 1
+                            val day = date.date
+                            val localDate = LocalDate.of(year, month, day)
+                            data.valor = localDate.toString()
                             onDataAlterada(data.valor)
-                            dateFieldText = LocalDate.of(date.year, date.month, date.day).formatar()
+                            dateFieldText = localDate.formatar()
                         }
                         showDatePicker = false
                     }) {
@@ -383,29 +388,29 @@ private fun FormContent(
             }
 
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = stringResource(R.string.paga),
-                tint = MaterialTheme.colorScheme.outline
-            )
-            FormTextField(
-                modifier = formTextFieldModifier,
-                titulo = stringResource(R.string.paga),
-                campoFormulario = paga,
-                onValorAlterado = onStatusPagamentoAlterado,
-                enabled = !processando
-            )
-        }
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.Start
-//        ) {
-//            Checkbox(checked = false, onCheckedChange = {
-//            })
-//            Text("Paga")
+//        Row(verticalAlignment = Alignment.CenterVertically) {
+//            Icon(
+//                imageVector = Icons.Filled.Check,
+//                contentDescription = stringResource(R.string.paga),
+//                tint = MaterialTheme.colorScheme.outline
+//            )
+//            FormTextField(
+//                modifier = formTextFieldModifier,
+//                titulo = stringResource(R.string.paga),
+//                campoFormulario = paga,
+//                onValorAlterado = onStatusPagamentoAlterado,
+//                enabled = !processando
+//            )
 //        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Checkbox(checked = false, onCheckedChange = {
+            })
+            Text("Paga")
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = Icons.Filled.AccountBalance,
