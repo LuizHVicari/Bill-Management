@@ -2,7 +2,6 @@ package br.edu.utfpr.trabalhofinal.ui.conta.form
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import br.edu.utfpr.trabalhofinal.R

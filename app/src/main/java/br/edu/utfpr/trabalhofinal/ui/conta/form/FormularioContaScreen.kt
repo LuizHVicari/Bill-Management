@@ -1,13 +1,7 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
 package br.edu.utfpr.trabalhofinal.ui.conta.form
-import android.annotation.SuppressLint
-import android.icu.text.DateFormat.getDateInstance
-import android.icu.text.DateFormat.getDateTimeInstance
-import android.provider.CalendarContract.Colors
-import android.widget.RadioGroup
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Notes
-import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
@@ -36,18 +29,14 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
@@ -59,7 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -68,23 +56,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.edu.utfpr.trabalhofinal.R
-import br.edu.utfpr.trabalhofinal.data.TipoContaEnum
 import br.edu.utfpr.trabalhofinal.ui.theme.TrabalhoFinalTheme
 import br.edu.utfpr.trabalhofinal.ui.utils.composables.Carregando
 import br.edu.utfpr.trabalhofinal.ui.utils.composables.ErroAoCarregar
-import br.edu.utfpr.trabalhofinal.ui.utils.constants.Sizes
 import br.edu.utfpr.trabalhofinal.utils.formatar
-import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
-import java.util.Date
 import java.util.TimeZone
 
 
@@ -370,11 +351,28 @@ private fun FormContent(
                 tint = MaterialTheme.colorScheme.outline
             )
             Box{
-                OutlinedTextField(
-                    value = dateFieldText,
-                    onValueChange = {},
-                    modifier = formTextFieldModifier
-                )
+                Column {
+                    OutlinedTextField(
+                        value = if (data.valor.isNotEmpty()) {
+                            LocalDate.parse(data.valor).formatar()
+                        } else {
+                            ""
+                        },
+                        onValueChange = {},
+                        modifier = formTextFieldModifier,
+                        isError = data.contemErro && data.valor.isEmpty(),
+                        label = { Text("Informe a data da conta") }
+                    )
+                    if (data.contemErro && data.valor.isEmpty()) {
+                        Text(
+                            text = stringResource(data.codigoMensagemErro),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(start = 20.dp)
+                        )
+                    }
+                }
+
                 Box(modifier = Modifier
                     .matchParentSize()
                     .clickable { showDatePicker = true })

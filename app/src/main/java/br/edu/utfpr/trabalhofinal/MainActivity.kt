@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import br.edu.utfpr.trabalhofinal.ui.AppContas
-import br.edu.utfpr.trabalhofinal.ui.conta.lista.gerarContas
 import br.edu.utfpr.trabalhofinal.ui.theme.TrabalhoFinalTheme
 
 
