@@ -35,4 +35,5 @@
     <string name="valor_invalido">Informe um valor válido</string>
     <string name="icon_is_paid">Ícone conta paga</string>
     <string name="bill_type">Tipo da conta</string>
+    <string name="data_invalida">Data inválida</string>
 </resources>

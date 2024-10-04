@@ -2,6 +2,8 @@
 
 package br.edu.utfpr.trabalhofinal.ui.conta.form
 import android.annotation.SuppressLint
+import android.icu.text.DateFormat.getDateInstance
+import android.icu.text.DateFormat.getDateTimeInstance
 import android.provider.CalendarContract.Colors
 import android.widget.RadioGroup
 import androidx.compose.foundation.clickable
@@ -76,8 +78,15 @@ import br.edu.utfpr.trabalhofinal.ui.utils.composables.ErroAoCarregar
 import br.edu.utfpr.trabalhofinal.ui.utils.constants.Sizes
 import br.edu.utfpr.trabalhofinal.utils.formatar
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.util.Date
+import java.util.TimeZone
+
 
 @Composable
 fun FormularioContaScreen(
@@ -100,7 +109,6 @@ fun FormularioContaScreen(
                 viewModel.onMensagemExibida()
             }
     }
-
     if (viewModel.state.mostrarDialogConfirmacao) {
         ConfirmationDialog(
             title = stringResource(R.string.atencao),
@@ -109,7 +117,6 @@ fun FormularioContaScreen(
             onConfirm = viewModel::removerConta
         )
     }
-
     val contentModifier: Modifier = modifier.fillMaxSize()
     if (viewModel.state.carregando) {
         Carregando(modifier = contentModifier)
@@ -139,6 +146,7 @@ fun FormularioContaScreen(
                 data = viewModel.state.data,
                 valor = viewModel.state.valor,
                 tipo = viewModel.state.tipo,
+                paga = viewModel.state.paga,
                 onDescricaoAlterada = viewModel::onDescricaoAlterada,
                 onDataAlterada = viewModel::onDataAlterada,
                 onValorAlterado = viewModel::onValorAlterado,
@@ -148,7 +156,6 @@ fun FormularioContaScreen(
         }
     }
 }
-
 @Composable
 fun ConfirmationDialog(
     modifier: Modifier = Modifier,
@@ -182,7 +189,6 @@ fun ConfirmationDialog(
         }
     )
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppBar(
@@ -256,7 +262,6 @@ private fun AppBarPreview() {
         )
     }
 }
-
 @Composable
 private fun FormContent(
     modifier: Modifier = Modifier,
@@ -265,6 +270,7 @@ private fun FormContent(
     data: CampoFormulario,
     valor: CampoFormulario,
     tipo: CampoFormulario,
+    paga: Boolean = false,
     onDescricaoAlterada: (String) -> Unit,
     onDataAlterada: (String) -> Unit,
     onValorAlterado: (String) -> Unit,
@@ -273,10 +279,13 @@ private fun FormContent(
 ) {
     var showDatePicker by remember { mutableStateOf(false)}
     val datePickerState = rememberDatePickerState()
-
-    var dateFieldText by remember { mutableStateOf("Informe a data atual") }
-    var paga by remember { mutableStateOf(false)}
-
+    var dateFieldText by remember {
+        if (data.valor.isEmpty()){
+            mutableStateOf("Informe a data da conta")
+        } else {
+            mutableStateOf(LocalDate.parse(data.valor).formatar())
+        }
+    }
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
@@ -285,10 +294,16 @@ private fun FormContent(
                     onClick = {
                         val dateMillis = datePickerState.selectedDateMillis
                         if (dateMillis != null) {
-                            val date = Date(dateMillis)
-                            val year = date.year + 1900
-                            val month = date.month + 1
-                            val day = date.date
+                            val instant = Instant.ofEpochMilli(dateMillis)
+                            val date = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
+                            val year = date.year
+                            val month = date.month
+                            // a data fica um dia para trás no meu celular
+                            val day = if (TimeZone.getDefault().id == "America/Sao_Paulo") {
+                                date.dayOfMonth + 1
+                            }  else {
+                                date.dayOfMonth
+                            }
                             val localDate = LocalDate.of(year, month, day)
                             data.valor = localDate.toString()
                             onDataAlterada(data.valor)
@@ -308,7 +323,6 @@ private fun FormContent(
             DatePicker(state = datePickerState)
         }
     }
-
     Column(
         modifier = modifier
             .padding(all = 16.dp)
@@ -345,6 +359,7 @@ private fun FormContent(
                 titulo = stringResource(R.string.valor),
                 campoFormulario = valor,
                 onValorAlterado = onValorAlterado,
+                keyboardType = KeyboardType.Decimal,
                 enabled = !processando
             )
         }
@@ -364,47 +379,17 @@ private fun FormContent(
                     .matchParentSize()
                     .clickable { showDatePicker = true })
             }
-
         }
-//        Row(verticalAlignment = Alignment.CenterVertically) {
-//            Icon(
-//                imageVector = Icons.Filled.Check,
-//                contentDescription = stringResource(R.string.paga),
-//                tint = MaterialTheme.colorScheme.outline
-//            )
-//            FormTextField(
-//                modifier = formTextFieldModifier,
-//                titulo = stringResource(R.string.paga),
-//                campoFormulario = paga,
-//                onValorAlterado = onStatusPagamentoAlterado,
-//                enabled = !processando
-//            )
-//        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
             Checkbox(checked = paga, onCheckedChange = {
-                paga = !paga
-                onStatusPagamentoAlterado(paga)
+                onStatusPagamentoAlterado(!paga)
             })
             Text(stringResource(id = R.string.paga))
         }
-//        Row(verticalAlignment = Alignment.CenterVertically) {
-//            Icon(
-//                imageVector = Icons.Filled.AccountBalance,
-//                contentDescription = stringResource(R.string.tipo),
-//                tint = MaterialTheme.colorScheme.outline
-//            )
-//            FormTextField(
-//                modifier = formTextFieldModifier,
-//                titulo = stringResource(R.string.tipo),
-//                campoFormulario = tipo,
-//                onValorAlterado = onTipoAlterado,
-//                enabled = !processando
-//            )
-//        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -463,7 +448,6 @@ fun FormTextField(
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 private fun FormContentPreview() {
@@ -478,7 +462,8 @@ private fun FormContentPreview() {
             onDataAlterada = {},
             onValorAlterado = {},
             onStatusPagamentoAlterado = {},
-            onTipoAlterado = {}
+            onTipoAlterado = {},
+            paga = false
         )
     }
 }

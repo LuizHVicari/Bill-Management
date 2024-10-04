@@ -2,6 +2,7 @@ package br.edu.utfpr.trabalhofinal.ui.conta.form
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import br.edu.utfpr.trabalhofinal.R
@@ -10,13 +11,15 @@ import br.edu.utfpr.trabalhofinal.data.TipoContaEnum
 import br.edu.utfpr.trabalhofinal.ui.Arguments
 import java.math.BigDecimal
 import java.time.LocalDate
+
 class FormularioContaViewModel(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val idConta: Int = savedStateHandle
         .get<String>(Arguments.ID_CONTA)
         ?.toIntOrNull() ?: 0
-    var state: FormularioContaState by mutableStateOf(FormularioContaState(idConta = idConta))
+    var state: FormularioContaState by mutableStateOf(FormularioContaState(idConta =
+    idConta))
         private set
     init {
         if (state.idConta > 0) {
@@ -66,34 +69,37 @@ class FormularioContaViewModel(
         if (state.data.valor != novaData) {
             state = state.copy(
                 data = state.data.copy(
-                    valor = novaData
+                    valor = novaData,
+                    codigoMensagemErro = validarData(novaData)
                 )
             )
         }
         println(state.data)
     }
+    private fun validarData(data: String): Int = if (data.isEmpty()) {
+        R.string.data_invalida
+    } else {
+        0
+    }
     fun onValorAlterado(novoValor: String) {
         if (state.valor.valor != novoValor) {
             state = state.copy(
                 valor = state.valor.copy(
-                    valor = novoValor
+                    valor = novoValor,
+                    codigoMensagemErro = validarValor(novoValor)
                 )
             )
         }
     }
+    private fun validarValor(valor: String): Int = if (valor.isEmpty() || valor.replace(',', '.').toFloatOrNull() == null) {
+        R.string.valor_invalido
+    } else {
+        0
+    }
     fun onStatusPagamentoAlterado(novoPaga: Boolean) {
-//        println(novoStatusPagamento)
-//        if (state.paga.valor != novoStatusPagamento) {
-//            state = state.copy(
-//                paga = state.paga.copy(
-//                    valor = novoStatusPagamento
-//                )
-//            )
-//        }
         state = state.copy(paga = novoPaga)
         println(state.paga)
     }
-
     fun onTipoAlterado(novoTipo: String) {
         if (state.tipo.valor != novoTipo) {
             state = state.copy(
@@ -108,19 +114,14 @@ class FormularioContaViewModel(
             state = state.copy(
                 salvando = true
             )
-            println(state.descricao.valor)
-            println(state.data.valor)
-            println(state.valor.valor)
             println(state.paga)
-            println(state.tipo.valor)
             val conta = state.conta.copy(
                 descricao = state.descricao.valor,
                 data = LocalDate.parse(state.data.valor),
-                valor = BigDecimal(state.valor.valor),
+                valor = BigDecimal(state.valor.valor.replace(',', '.')),
                 paga = state.paga,
                 tipo = TipoContaEnum.valueOf(state.tipo.valor)
             )
-            println("passou")
             ContaDatasource.instance.salvar(conta)
             state = state.copy(
                 salvando = false,
@@ -132,6 +133,16 @@ class FormularioContaViewModel(
         state = state.copy(
             descricao = state.descricao.copy(
                 codigoMensagemErro = validarDescricao(state.descricao.valor)
+            )
+        )
+        state = state.copy(
+            valor = state.valor.copy(
+                codigoMensagemErro = validarValor(state.valor.valor)
+            )
+        )
+        state = state.copy(
+            data = state.data.copy(
+                codigoMensagemErro = validarData(state.data.valor)
             )
         )
         return state.formularioValido

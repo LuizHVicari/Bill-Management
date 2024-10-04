@@ -9,7 +9,7 @@ class ContaDatasource private constructor() {
         }
     }
 
-    private val contas: MutableList<Conta> = gerarContas().toMutableList()
+    private val contas: MutableList<Conta> = mutableListOf()
     private val contasObservers: MutableList<ContasObserver> = mutableListOf()
 
     fun registrarObserver(contasObserver: ContasObserver) {
